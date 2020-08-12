@@ -1,0 +1,13 @@
+.container {
+  width: 98vw;
+  height: 98vh;
+  display: flex;
+}
+.MuiPaper-root {
+  width: 100%;
+}
+.MuiToolbar-root {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
