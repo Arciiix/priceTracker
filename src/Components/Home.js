@@ -1,18 +1,8 @@
 import React from "react";
-import {
-  Dialog,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-} from "@material-ui/core";
-
-import CloseIcon from "@material-ui/icons/Close";
-import SaveIcon from "@material-ui/icons/Save";
-
 import MaterialTable from "material-table";
 
 import "../Styles/Home.css";
+import EditDialog from "./EditDialog";
 
 const translation = {
   body: {
@@ -105,39 +95,27 @@ class Home extends React.Component {
     this.setState({ products: productsArray });
   }
 
-  saveTheChanges() {
+  saveTheChanges(changes) {
     //DEV
+    console.log("Save the changes");
+    console.log(changes);
     this.setState({ isEditing: false });
   }
 
   render() {
     return (
       <div className="container">
-        <Dialog fullScreen open={this.state.isEditing}>
-          <AppBar>
-            <Toolbar>
-              <IconButton
-                edge="start"
-                color="inherit"
-                aria-label="Zamknij"
-                onClick={() => {
-                  this.setState({ isEditing: false });
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-              <Typography variant="h6">Edytuj</Typography>
-              <IconButton
-                edge="end"
-                color="inherit"
-                aria-label="Zapisz"
-                onClick={this.saveTheChanges.bind(this)}
-              >
-                <SaveIcon />
-              </IconButton>
-            </Toolbar>
-          </AppBar>
-        </Dialog>
+        <EditDialog
+          isEditing={this.state.isEditing}
+          currentEditedProduct={this.state.currentEditedProduct}
+          that={this}
+          turnOffEditMode={(shouldSaveTheChanges, changes) => {
+            if (shouldSaveTheChanges) {
+              this.saveTheChanges(changes);
+            }
+            this.setState({ isEditing: false });
+          }}
+        />
         <MaterialTable
           isLoading={this.state.isLoading}
           localization={translation}
