@@ -30,6 +30,7 @@ class ProductDialog extends React.Component {
       hasTheInformationBeenFetched: false,
       price: 0,
       originalName: "",
+      urlError: false,
     };
   }
 
@@ -47,22 +48,54 @@ class ProductDialog extends React.Component {
         customName: this.props.currentEditedProduct.name,
         previousName: this.props.currentEditedProduct.name,
         hasTheInformationBeenFetched: false,
+        urlError: false,
       });
     }
   }
 
-  fetchInfo() {
+  async fetchInfo() {
     this.setState({ isLoading: true });
     //DEV
     //Fetch the info
-    let price = 233;
-    let name = "testowa nazwa";
+    let request = await fetch(`${this.props.serverIp}/getTheProductInfo`, {
+      method: "POST",
+      body: JSON.stringify({ url: this.state.url }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (request.status !== 200) {
+      this.setState({ urlError: true, isLoading: false });
+      return;
+    }
+    let response = await request.json();
     this.setState({
       isLoading: false,
+      urlError: false,
       hasTheInformationBeenFetched: true,
-      price: price,
-      originalName: name,
+      price: response.price,
+      originalName: response.originalName,
     });
+  }
+
+  async save() {
+    let request = await fetch(`${this.props.serverIp}/getTheProductInfo`, {
+      method: "POST",
+      body: JSON.stringify({ url: this.state.url }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (request.status !== 200) {
+      this.setState({ urlError: true });
+      return;
+    }
+    this.props.hideTheDialog.bind(this.props.that, true, {
+      changes: {
+        url: this.state.url,
+        customName: this.state.customName,
+      },
+    })();
   }
 
   render() {
@@ -88,12 +121,7 @@ class ProductDialog extends React.Component {
               edge="end"
               color="inherit"
               aria-label="Zapisz"
-              onClick={this.props.hideTheDialog.bind(this.props.that, true, {
-                changes: {
-                  url: this.state.url,
-                  customName: this.state.customName,
-                },
-              })}
+              onClick={this.save.bind(this)}
             >
               <SaveIcon />
             </IconButton>
@@ -109,6 +137,7 @@ class ProductDialog extends React.Component {
           style={{ width: "75%" }}
           value={this.state.url}
           required
+          error={this.state.urlError}
           onChange={(e) => {
             this.setState({ url: e.target.value });
           }}
@@ -143,7 +172,7 @@ class ProductDialog extends React.Component {
           </div>
           <div className="infoRow">
             <LocalOfferIcon fontSize="inherit" />
-            <span className="infoText">{this.state.price}</span>
+            <span className="infoText">{this.state.price} zł</span>
           </div>
         </div>
       </Dialog>

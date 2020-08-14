@@ -5,6 +5,9 @@ import "../Styles/Home.css";
 import ProductDialog from "./ProductDialog";
 import DeleteDialog from "./DeleteDialog";
 
+//DEV
+const serverIp = "http://192.168.0.107:9182";
+
 const translation = {
   body: {
     emptyDataSourceMessage: "Nie znaleziono żadnych produktów!",
@@ -54,178 +57,58 @@ class Home extends React.Component {
     };
   }
 
-  componentDidMount() {
-    //DEV
-    this.setState(
-      {
-        products: [
-          {
-            id: 1,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example.com",
-          },
-          {
-            id: 2,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example1.com",
-          },
-          {
-            id: 3,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example2.com",
-          },
-          {
-            id: 4,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example3.com",
-          },
-          {
-            id: 5,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example1.com",
-          },
-          {
-            id: 6,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example.com",
-          },
-          {
-            id: 7,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example1.com",
-          },
-          {
-            id: 8,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example2.com",
-          },
-          {
-            id: 9,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example3.com",
-          },
-          {
-            id: 10,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example1.com",
-          },
-          {
-            id: 11,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example.com",
-          },
-          {
-            id: 12,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example1.com",
-          },
-          {
-            id: 13,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example2.com",
-          },
-          {
-            id: 14,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example3.com",
-          },
-          {
-            id: 15,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example1.com",
-          },
-          {
-            id: 16,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example.com",
-          },
-          {
-            id: 17,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example1.com",
-          },
-          {
-            id: 18,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example2.com",
-          },
-          {
-            id: 19,
-            name: "test2",
-            shop: "test3",
-            price: 423.3,
-            url: "http://example3.com",
-          },
-          {
-            id: 20,
-            name: "test",
-            shop: "test1",
-            price: 123,
-            url: "http://example1.com",
-          },
-        ],
-        isLoading: false,
+  async componentDidMount() {
+    let request = await fetch(`${serverIp}/getData`);
+    if (request.status === 200) {
+      let response = await request.json();
+      this.setState(
+        {
+          products: response,
+          isLoading: false,
+        },
+        this.forceUpdate
+      );
+    }
+  }
+
+  async deleteProducts(ids) {
+    let request = await fetch(`${serverIp}/delete`, {
+      method: "POST",
+      body: JSON.stringify({ ids: ids }),
+      headers: {
+        "Content-Type": "application/json",
       },
-      this.forceUpdate
-    );
-  }
-
-  deleteProducts(ids) {
-    //DEV
-    //ids are indexes of the items in database
-    console.log(`Products to delete: ${ids.join(", ")}`);
-
-    let productsArray = this.state.products;
-    ids.forEach((elem) => {
-      productsArray = productsArray.filter((e) => e.id !== elem);
     });
-    this.setState({ products: productsArray });
+
+    if (request.status === 200) {
+      let productsArray = this.state.products;
+      ids.forEach((elem) => {
+        productsArray = productsArray.filter((e) => e.id !== elem);
+      });
+      this.setState({ products: productsArray });
+    }
   }
 
-  saveTheChanges(changes) {
+  async saveTheChanges(changes) {
     if (this.state.currentEditedProduct.id) {
-      //DEV
-      console.log("Save the changes");
-      console.log(changes);
+      await fetch(`${serverIp}/updateProduct`, {
+        method: "POST",
+        body: JSON.stringify({
+          changes: changes.changes,
+          previous: this.state.currentEditedProduct,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     } else {
-      console.log("Create the new product");
-      console.log(changes);
+      await fetch(`${serverIp}/newProduct`, {
+        method: "POST",
+        body: JSON.stringify(changes),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     this.setState({ isDialogOpened: false, currentEditedProduct: null });
@@ -238,6 +121,7 @@ class Home extends React.Component {
           isOpened={this.state.isDialogOpened}
           currentEditedProduct={this.state.currentEditedProduct}
           that={this}
+          serverIp={serverIp}
           hideTheDialog={(shouldSaveTheChanges, changes) => {
             if (shouldSaveTheChanges) {
               this.saveTheChanges(changes);
