@@ -2,7 +2,7 @@ import React from "react";
 import MaterialTable from "material-table";
 
 import "../Styles/Home.css";
-import EditDialog from "./EditDialog";
+import ProductDialog from "./ProductDialog";
 
 const translation = {
   body: {
@@ -46,7 +46,7 @@ class Home extends React.Component {
     this.state = {
       products: [],
       isLoading: true,
-      isEditing: false,
+      isDialogOpened: false,
       currentEditedProduct: null,
     };
   }
@@ -56,26 +56,146 @@ class Home extends React.Component {
     this.setState(
       {
         products: [
-          { id: 1, name: "test", shop: "test1", price: 123 },
-          { id: 2, name: "test2", shop: "test3", price: 423.3 },
-          { id: 3, name: "test", shop: "test1", price: 123 },
-          { id: 4, name: "test2", shop: "test3", price: 423.3 },
-          { id: 5, name: "test", shop: "test1", price: 123 },
-          { id: 6, name: "test2", shop: "test3", price: 423.3 },
-          { id: 7, name: "test", shop: "test1", price: 123 },
-          { id: 8, name: "test2", shop: "test3", price: 423.3 },
-          { id: 9, name: "test", shop: "test1", price: 123 },
-          { id: 10, name: "test2", shop: "test3", price: 423.3 },
-          { id: 11, name: "test", shop: "test1", price: 123 },
-          { id: 12, name: "test2", shop: "test3", price: 423.3 },
-          { id: 13, name: "test", shop: "test1", price: 123 },
-          { id: 14, name: "test2", shop: "test3", price: 423.3 },
-          { id: 15, name: "test", shop: "test1", price: 123 },
-          { id: 16, name: "test2", shop: "test3", price: 423.3 },
-          { id: 17, name: "test", shop: "test1", price: 123 },
-          { id: 18, name: "test2", shop: "test3", price: 423.3 },
-          { id: 19, name: "test", shop: "test1", price: 123 },
-          { id: 20, name: "test2", shop: "test3", price: 423.3 },
+          {
+            id: 1,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example.com",
+          },
+          {
+            id: 2,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example1.com",
+          },
+          {
+            id: 3,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example2.com",
+          },
+          {
+            id: 4,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example3.com",
+          },
+          {
+            id: 5,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example1.com",
+          },
+          {
+            id: 6,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example.com",
+          },
+          {
+            id: 7,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example1.com",
+          },
+          {
+            id: 8,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example2.com",
+          },
+          {
+            id: 9,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example3.com",
+          },
+          {
+            id: 10,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example1.com",
+          },
+          {
+            id: 11,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example.com",
+          },
+          {
+            id: 12,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example1.com",
+          },
+          {
+            id: 13,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example2.com",
+          },
+          {
+            id: 14,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example3.com",
+          },
+          {
+            id: 15,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example1.com",
+          },
+          {
+            id: 16,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example.com",
+          },
+          {
+            id: 17,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example1.com",
+          },
+          {
+            id: 18,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example2.com",
+          },
+          {
+            id: 19,
+            name: "test2",
+            shop: "test3",
+            price: 423.3,
+            url: "http://example3.com",
+          },
+          {
+            id: 20,
+            name: "test",
+            shop: "test1",
+            price: 123,
+            url: "http://example1.com",
+          },
         ],
         isLoading: false,
       },
@@ -96,30 +216,36 @@ class Home extends React.Component {
   }
 
   saveTheChanges(changes) {
-    //DEV
-    console.log("Save the changes");
-    console.log(changes);
-    this.setState({ isEditing: false });
+    if (this.state.currentEditedProduct.id) {
+      //DEV
+      console.log("Save the changes");
+      console.log(changes);
+    } else {
+      console.log("Create the new product");
+      console.log(changes);
+    }
+
+    this.setState({ isDialogOpened: false, currentEditedProduct: null });
   }
 
   render() {
     return (
       <div className="container">
-        <EditDialog
-          isEditing={this.state.isEditing}
+        <ProductDialog
+          isOpened={this.state.isDialogOpened}
           currentEditedProduct={this.state.currentEditedProduct}
           that={this}
-          turnOffEditMode={(shouldSaveTheChanges, changes) => {
+          hideTheDialog={(shouldSaveTheChanges, changes) => {
             if (shouldSaveTheChanges) {
               this.saveTheChanges(changes);
             }
-            this.setState({ isEditing: false });
+            this.setState({ isDialogOpened: false });
           }}
         />
         <MaterialTable
           isLoading={this.state.isLoading}
           localization={translation}
-          title="Basic Selection Preview"
+          title="Price tracker"
           columns={[
             { title: "Nazwa", field: "name" },
             { title: "Sklep", field: "shop" },
@@ -140,6 +266,9 @@ class Home extends React.Component {
             selection: true,
             showTitle: false,
             actionsColumnIndex: -1,
+            exportButton: true,
+            exportAllData: true,
+            exportFileName: `Prices-${new Date().toLocaleDateString("PL-pl")}`,
             pageSizeOptions: [
               this.state.products.length,
               5,
@@ -156,6 +285,17 @@ class Home extends React.Component {
           }}
           actions={[
             {
+              tooltip: "Dodaj nowy produkt",
+              icon: "add",
+              isFreeAction: true,
+              onClick: (e, data) => {
+                this.setState({
+                  currentEditedProduct: { url: "", name: "" },
+                  isDialogOpened: true,
+                });
+              },
+            },
+            {
               tooltip: "Usuń zaznaczone produkty",
               icon: "delete",
               onClick: (e, data) => {
@@ -169,7 +309,7 @@ class Home extends React.Component {
               onClick: (e, data) => {
                 this.setState({
                   currentEditedProduct: this.state.products[data.tableData.id],
-                  isEditing: true,
+                  isDialogOpened: true,
                 });
               },
             },

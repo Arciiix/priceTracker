@@ -18,12 +18,14 @@ import LocalOfferIcon from "@material-ui/icons/LocalOffer";
 
 import "../Styles/Home.css";
 
-class EditDialog extends React.Component {
+class ProductDialog extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: false,
       url: "",
+      previousName: "",
+      previousUrl: "",
       customName: "",
       hasTheInformationBeenFetched: false,
       price: 0,
@@ -34,6 +36,19 @@ class EditDialog extends React.Component {
   componentDidUpdate() {
     //DEV
     console.log(this.props.currentEditedProduct);
+    if (
+      this.props.currentEditedProduct &&
+      this.props.currentEditedProduct.url !== this.state.previousUrl &&
+      this.props.currentEditedProduct.name !== this.state.previousName
+    ) {
+      this.setState({
+        url: this.props.currentEditedProduct.url,
+        previousUrl: this.props.currentEditedProduct.url,
+        customName: this.props.currentEditedProduct.name,
+        previousName: this.props.currentEditedProduct.name,
+        hasTheInformationBeenFetched: false,
+      });
+    }
   }
 
   fetchInfo() {
@@ -52,23 +67,28 @@ class EditDialog extends React.Component {
 
   render() {
     return (
-      <Dialog fullScreen open={this.props.isEditing}>
+      <Dialog fullScreen open={this.props.isOpened}>
         <AppBar>
           <Toolbar>
             <IconButton
               edge="start"
               color="inherit"
               aria-label="Zamknij"
-              onClick={this.props.turnOffEditMode.bind(this.props.that, false)}
+              onClick={this.props.hideTheDialog.bind(this.props.that, false)}
             >
               <CloseIcon />
             </IconButton>
-            <Typography variant="h6">Edytuj</Typography>
+            <Typography variant="h6">
+              {this.props.currentEditedProduct &&
+              this.props.currentEditedProduct.url !== ""
+                ? "Edytuj"
+                : "Dodaj"}
+            </Typography>
             <IconButton
               edge="end"
               color="inherit"
               aria-label="Zapisz"
-              onClick={this.props.turnOffEditMode.bind(this.props.that, true, {
+              onClick={this.props.hideTheDialog.bind(this.props.that, true, {
                 changes: {
                   url: this.state.url,
                   customName: this.state.customName,
@@ -130,4 +150,4 @@ class EditDialog extends React.Component {
     );
   }
 }
-export default EditDialog;
+export default ProductDialog;
