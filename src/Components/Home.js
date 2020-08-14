@@ -3,6 +3,7 @@ import MaterialTable from "material-table";
 
 import "../Styles/Home.css";
 import ProductDialog from "./ProductDialog";
+import DeleteDialog from "./DeleteDialog";
 
 const translation = {
   body: {
@@ -48,6 +49,8 @@ class Home extends React.Component {
       isLoading: true,
       isDialogOpened: false,
       currentEditedProduct: null,
+      askDelete: false,
+      idsToDelete: [],
     };
   }
 
@@ -242,6 +245,16 @@ class Home extends React.Component {
             this.setState({ isDialogOpened: false });
           }}
         />
+        <DeleteDialog
+          isOpened={this.state.askDelete}
+          that={this}
+          productsToDelete={this.state.idsToDelete}
+          deleteFunc={this.deleteProducts}
+          close={() => {
+            this.setState({ askDelete: false });
+          }}
+        />
+
         <MaterialTable
           isLoading={this.state.isLoading}
           localization={translation}
@@ -299,7 +312,10 @@ class Home extends React.Component {
               tooltip: "Usuń zaznaczone produkty",
               icon: "delete",
               onClick: (e, data) => {
-                this.deleteProducts(data.map((e) => e.id));
+                this.setState({
+                  askDelete: true,
+                  idsToDelete: data.map((e) => e.id),
+                });
               },
             },
             {
