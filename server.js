@@ -8,7 +8,7 @@ const SHOPS = {
   TEST: "test", //DEV
   MEDIAEXPERT: "MediaExpert",
   RTVEUROAGD: "RTV EURO AGD",
-  MORELE: "morele.net",
+  MORELE: "Morele.net",
 };
 
 const express = require("express");
@@ -121,6 +121,7 @@ function getTheProductInfo(url) {
     let originalName,
       price,
       shop = SHOPS.EMPTY;
+    if (!url) return resolve({ error: true });
     if (url.includes("https://www.mediaexpert.pl/")) {
       shop = SHOPS.MEDIAEXPERT;
     } else if (url.includes("https://www.euro.com.pl/")) {
@@ -148,6 +149,9 @@ function getTheProductInfo(url) {
     });
   });
 }
+
+//For tests
+module.exports.productInfo = getTheProductInfo;
 
 function fetchTheDataFromShop(url, shop) {
   return new Promise(async (resolve, reject) => {
