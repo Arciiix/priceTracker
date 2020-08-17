@@ -8,12 +8,16 @@ const SHOPS = {
   TEST: "test", //DEV
   MEDIAEXPERT: "MediaExpert",
   RTVEUROAGD: "RTV EURO AGD",
+  MORELE: "morele.net",
 };
 
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const fetch = require("node-fetch");
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 const app = express();
 app.use(bodyParser.json());
@@ -119,20 +123,22 @@ function getTheProductInfo(url) {
       shop = SHOPS.EMPTY;
     if (url.includes("https://www.mediaexpert.pl/")) {
       shop = SHOPS.MEDIAEXPERT;
-      //DEV
-      //Fetch the originalName and price,
     } else if (url.includes("https://www.euro.com.pl/")) {
       shop = SHOPS.RTVEUROAGD;
-      //DEV
-      //Fetch the originalName and price,
-    } else {
-      //DEV
-      shop = SHOPS.TEST;
-      price = 123.45;
-      originalName = "testowy produkt";
+    } else if (url.includes("https://www.morele.net/")) {
+      shop = SHOPS.MORELE;
     }
 
-    if (shop === SHOPS.EMPTY) resolve({ error: true });
+    if (shop === SHOPS.EMPTY) {
+      return resolve({ error: true });
+    } else {
+      let obj = await fetchTheDataFromShop(url, shop);
+      if (!obj) {
+        return resolve({ error: true });
+      } else {
+        ({ originalName, price } = obj);
+      }
+    }
 
     resolve({
       shop: shop,
@@ -143,6 +149,56 @@ function getTheProductInfo(url) {
   });
 }
 
+function fetchTheDataFromShop(url, shop) {
+  return new Promise(async (resolve, reject) => {
+    if (!url || !shop) return resolve(false);
+    let request;
+    try {
+      request = await fetch(url);
+    } catch (err) {
+      if (err) return resolve(false);
+    }
+    if (request.status !== 200) return resolve(false);
+    let response = await request.text();
+    let parsedDocument = new JSDOM(response);
+    parsedDocument = parsedDocument.window.document;
+    let price, name;
+
+    switch (shop) {
+      case SHOPS.MEDIAEXPERT:
+        price =
+          parsedDocument.querySelector("[data-price]").dataset.price / 100;
+        price = parseFloat(price);
+        name = parsedDocument.querySelector("h1.a-typo.is-primary").textContent;
+        name = name.replace(/(\r\n|\n|\r)/gm, ""); //Remove the line-breaks
+        break;
+      case SHOPS.RTVEUROAGD:
+        price = parsedDocument
+          .querySelector(".selenium-price-normal")
+          .textContent.replace("&nbps;", "")
+          .replace("\n\t", "")
+          .replace("zł", "")
+          .replace(",", ".");
+        price = parseFloat(price);
+        name = parsedDocument
+          .querySelector(".selenium-KP-product-name")
+          .textContent.replace(/(\n|\t)/g, ""); //Remove the line-breaks and tabs
+        break;
+      case SHOPS.MORELE:
+        price = parsedDocument
+          .querySelector(".price-new")
+          .textContent.replace("zł", "")
+          .replace(",", ".");
+        price = parseFloat(price);
+        name = parsedDocument.querySelector(".prod-name").textContent.trim();
+        break;
+      default:
+        return resolve(false);
+        break;
+    }
+    return resolve({ originalName: name, price: price });
+  });
+}
 function getDataFromDB() {
   return new Promise((resolve, reject) => {
     let query = `SELECT * FROM ${OPTIONS.tableName}`;
