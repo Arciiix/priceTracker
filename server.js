@@ -152,12 +152,14 @@ function getTheProductInfo(url) {
 function fetchTheDataFromShop(url, shop) {
   return new Promise(async (resolve, reject) => {
     if (!url || !shop) return resolve(false);
+
     let request;
     try {
       request = await fetch(url);
     } catch (err) {
       if (err) return resolve(false);
     }
+
     if (request.status !== 200) return resolve(false);
     let response = await request.text();
     let parsedDocument = new JSDOM(response);
@@ -169,6 +171,7 @@ function fetchTheDataFromShop(url, shop) {
         price =
           parsedDocument.querySelector("[data-price]").dataset.price / 100;
         price = parseFloat(price);
+
         name = parsedDocument.querySelector("h1.a-typo.is-primary").textContent;
         name = name.replace(/(\r\n|\n|\r)/gm, ""); //Remove the line-breaks
         break;
@@ -180,6 +183,7 @@ function fetchTheDataFromShop(url, shop) {
           .replace("zł", "")
           .replace(",", ".");
         price = parseFloat(price);
+
         name = parsedDocument
           .querySelector(".selenium-KP-product-name")
           .textContent.replace(/(\n|\t)/g, ""); //Remove the line-breaks and tabs
@@ -190,6 +194,7 @@ function fetchTheDataFromShop(url, shop) {
           .textContent.replace("zł", "")
           .replace(",", ".");
         price = parseFloat(price);
+
         name = parsedDocument.querySelector(".prod-name").textContent.trim();
         break;
       default:
