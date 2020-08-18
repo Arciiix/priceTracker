@@ -1,11 +1,11 @@
 const OPTIONS = {
   port: 9182,
   tableName: "products",
+  cronExpressionToCheckPrices: "0 10-20 * * *", //10 times a day (every hour from 10 to 20)
 };
 
 const SHOPS = {
   EMPTY: null,
-  TEST: "test", //DEV
   MEDIAEXPERT: "MediaExpert",
   RTVEUROAGD: "RTV EURO AGD",
   MORELE: "Morele.net",
@@ -18,6 +18,7 @@ const cors = require("cors");
 const fetch = require("node-fetch");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
+const schedule = require("node-schedule");
 
 const app = express();
 app.use(bodyParser.json());
@@ -283,6 +284,25 @@ function updateProduct(newObj, id) {
   });
 }
 
+function updateHistoryPrices(newPrice, previousHistoryPrices, id) {
+  return new Promise((resolve, reject) => {
+    let historyPrices = JSON.parse(previousHistoryPrices);
+    historyPrices.push({ date: new Date().getTime(), price: newPrice });
+    let query = `UPDATE ${OPTIONS.tableName} SET historyPrices = ? WHERE id = ? `;
+    db.run(query, [JSON.stringify(historyPrices), id], (err) => {
+      if (err) {
+        console.log(
+          `[${formatDate(
+            new Date()
+          )}] Error while trying to update product's history prices in the database: ${err}`
+        );
+        return resolve(false);
+      }
+      return resolve(true);
+    });
+  });
+}
+
 function deleteProduct(id) {
   return new Promise((resolve, reject) => {
     let query = `DELETE FROM ${OPTIONS.tableName} WHERE id = ?`;
@@ -300,6 +320,57 @@ function deleteProduct(id) {
   });
 }
 
+function checkProductsPrices() {
+  return new Promise(async (resolve, reject) => {
+    let rows = await getDataFromDB();
+    if (!rows) {
+      //DEV
+      //Send error e-mail
+      return resolve(false);
+    }
+    rows.forEach(async (e) => {
+      let data = await fetchTheDataFromShop(e.url, e.shop);
+      if (!data) {
+        //DEV
+        //Send error e-mail
+        return resolve(false);
+      }
+      if (data.price !== e.price) {
+        let handler = await handleNewPrice(e, data.price);
+        console.log("NEW PRICE");
+        if (!handler) {
+          //DEV
+          //Send error e-mail
+          return resolve(false);
+        }
+      }
+    });
+  });
+}
+
+function handleNewPrice(row, newPrice) {
+  return new Promise(async (resolve, reject) => {
+    console.log(row, newPrice);
+    let newObj = {
+      ...row,
+      ...{ price: newPrice },
+    };
+    let updateRow = await updateProduct(newObj, newObj.id);
+    let updateHistoryPricesRow = await updateHistoryPrices(
+      newPrice,
+      row.historyPrices,
+      row.id
+    );
+    if (!updateRow || !updateHistoryPricesRow) {
+      //DEV
+      //Send error e-mail
+      return resolve(false);
+    }
+
+    //Send an e-mail DEV
+  });
+}
+
 function formatDate(date) {
   return (
     date.toLocaleDateString("PL-pl", {
@@ -314,4 +385,8 @@ function formatDate(date) {
 
 app.listen(OPTIONS.port, () => {
   console.log(`[${formatDate(new Date())}] App has started at ${OPTIONS.port}`);
+});
+
+schedule.scheduleJob(OPTIONS.cronExpressionToCheckPrices, async () => {
+  await checkProductsPrices();
 });

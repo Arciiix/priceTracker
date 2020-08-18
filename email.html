@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+    }
+    .content {
+      background-color: white;
+    }
+    .basicInfo {
+      background-color: #73bcff;
+      width: calc(100%+30px);
+      margin-right: -10px;
+      margin-top: -10px;
+      margin-left: -10px;
+    }
+    .title {
+      text-align: center;
+      color: white;
+      font-size: 5rem;
+      margin-top: -5px;
+    }
+    .info {
+      display: flex;
+      flex-direction: row;
+      color: white;
+    }
+    .icon {
+      font-size: 4rem;
+    }
+    .infoText {
+      line-height: 4rem;
+      font-size: 3rem;
+    }
+    .textCenter {
+      text-align: center;
+    }
+    .otherInfo {
+      color: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .otherInfoInLine {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+    .green {
+      color: #71eb7d;
+    }
+    .red {
+      color: #d83d3d;
+    }
+    .footer {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      width: 90%;
+    }
+    .appName {
+      line-height: 4rem;
+      font-size: 4rem;
+    }
+  </style>
+  <body>
+    <div class="content">
+      <div class="basicInfo">
+        <h1 class="title">{title}</h1>
+        <div class="info">
+          <div class="icon">A</div>
+          <span class="infoText">{name}</span>
+        </div>
+        <div class="info">
+          <div class="icon">B</div>
+          <span class="infoText">{price}</span>
+        </div>
+        <div class="info">
+          <div class="icon">C</div>
+          <span class="infoText">{shop}</span>
+        </div>
+      </div>
+
+      <div class="otherInfo">
+        <span class="infoText textCenter {colorClass}">{percent}</span>
+      </div>
+      <div class="otherInfoInLine">
+        <div class="icon">D</div>
+        <span class="infoText textCenter">{previousPrice}</span>
+      </div>
+      <div class="footer">
+        <div class="icon">E</div>
+        <span class="appName">PriceTracker</span>
+      </div>
+    </div>
+  </body>
+</html>
