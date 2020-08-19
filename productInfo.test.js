@@ -1,8 +1,6 @@
 const server = require("./server");
 const productInfo = server.productInfo;
 
-//The product is something, which price is always greater than 230 and lower than 280 zł
-
 test("Gets the MediaExpert product correctly", async () => {
   let info = await productInfo(
     "https://www.mediaexpert.pl/gaming/kontrolery-pady/kontroler-sony-dualshock-4-v2-czarny"
@@ -12,8 +10,6 @@ test("Gets the MediaExpert product correctly", async () => {
   expect(info.originalName).toBe("Kontroler SONY DualShock 4 V2 Czarny");
   expect(info.price).not.toBeNaN();
   expect(parseFloat(info.price)).toEqual(info.price);
-  expect(info.price).toBeGreaterThanOrEqual(230.0);
-  expect(info.price).toBeLessThanOrEqual(280.0);
 });
 
 test("Gets the RTV EURO AGD product conrrectly", async () => {
@@ -25,8 +21,6 @@ test("Gets the RTV EURO AGD product conrrectly", async () => {
   expect(info.originalName).toBe("Sony DualShock 4 v2 (czarny)");
   expect(info.price).not.toBeNaN();
   expect(parseFloat(info.price)).toEqual(info.price);
-  expect(info.price).toBeGreaterThanOrEqual(230.0);
-  expect(info.price).toBeLessThanOrEqual(280.0);
 });
 
 test("Gets the Morele product conrrectly", async () => {
@@ -38,8 +32,6 @@ test("Gets the Morele product conrrectly", async () => {
   expect(info.originalName).toBe("Gamepad Sony PS4 Dualshock 4 V2 (9870050)");
   expect(info.price).not.toBeNaN();
   expect(parseFloat(info.price)).toEqual(info.price);
-  expect(info.price).toBeGreaterThanOrEqual(230.0);
-  expect(info.price).toBeLessThanOrEqual(280.0);
 });
 
 test("Handles missing url", async () => {
