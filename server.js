@@ -385,8 +385,11 @@ function handleNewPrice(row, newPrice) {
       row.id
     );
     if (!updateRow || !updateHistoryPricesRow) {
-      //DEV
-      //Send error e-mail
+      console.log(
+        `[${formatDate(
+          new Date()
+        )}] Error while trying to update rows in the database`
+      );
       return resolve(false);
     }
 
