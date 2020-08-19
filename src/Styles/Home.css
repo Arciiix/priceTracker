@@ -28,3 +28,13 @@
 .infoRow span {
   margin-left: 5px;
 }
+.chartContainer {
+  margin-top: 50px;
+  width: 90%;
+  height: 80%;
+}
+@media (max-height: 350px) and (orientation: landscape) {
+  .chartContainer {
+    margin-top: 100px;
+  }
+}

@@ -25,11 +25,13 @@ test("Gets the RTV EURO AGD product conrrectly", async () => {
 
 test("Gets the Morele product conrrectly", async () => {
   let info = await productInfo(
-    "https://www.morele.net/gamepad-sony-ps4-dualshock-4-v2-9870050-1053659/"
+    "https://www.morele.net/smartfon-apple-iphone-11-64-gb-dual-sim-czarny-mwlt2pm-a-5939894/"
   );
 
   expect(info.shop).toBe("Morele.net");
-  expect(info.originalName).toBe("Gamepad Sony PS4 Dualshock 4 V2 (9870050)");
+  expect(info.originalName).toBe(
+    "Smartfon Apple iPhone 11 64 GB Dual SIM Czarny (MWLT2PM/A)"
+  );
   expect(info.price).not.toBeNaN();
   expect(parseFloat(info.price)).toEqual(info.price);
 });

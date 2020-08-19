@@ -35,8 +35,6 @@ class ProductDialog extends React.Component {
   }
 
   componentDidUpdate() {
-    //DEV
-    console.log(this.props.currentEditedProduct);
     if (
       this.props.currentEditedProduct &&
       this.props.currentEditedProduct.url !== this.state.previousUrl &&
@@ -55,8 +53,6 @@ class ProductDialog extends React.Component {
 
   async fetchInfo() {
     this.setState({ isLoading: true });
-    //DEV
-    //Fetch the info
     let request = await fetch(`${this.props.serverIp}/getTheProductInfo`, {
       method: "POST",
       body: JSON.stringify({ url: this.state.url }),

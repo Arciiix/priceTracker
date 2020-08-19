@@ -4,6 +4,7 @@ import MaterialTable from "material-table";
 import "../Styles/Home.css";
 import ProductDialog from "./ProductDialog";
 import DeleteDialog from "./DeleteDialog";
+import HistoryChart from "./HistoryChart";
 
 //DEV
 const serverIp = "http://192.168.0.107:9182";
@@ -37,12 +38,17 @@ const translation = {
   },
 };
 
+/*
+It's deprecated because there were some problems with it, but it can be turned on with some limitations
+The problem was with zooming - when you zoomed in, the site will pop an unhandled error
 let h =
   window.innerHeight ||
   document.documentElement.clientHeight ||
   document.body.clientHeight;
 
 let numberOfRows = Math.floor((h - 200) / 50);
+DEPRECATED_AUTOROWS
+*/
 
 class Home extends React.Component {
   constructor(props) {
@@ -54,6 +60,8 @@ class Home extends React.Component {
       currentEditedProduct: null,
       askDelete: false,
       idsToDelete: [],
+      isViewingHistoryPrices: false,
+      historyPricesChartProducts: [],
     };
   }
 
@@ -139,6 +147,18 @@ class Home extends React.Component {
           }}
         />
 
+        <HistoryChart
+          isOpened={this.state.isViewingHistoryPrices}
+          that={this}
+          products={this.state.historyPricesChartProducts}
+          close={() => {
+            this.setState({
+              isViewingHistoryPrices: false,
+              historyPricesChartProducts: [],
+            });
+          }}
+        />
+
         <MaterialTable
           isLoading={this.state.isLoading}
           localization={translation}
@@ -170,7 +190,9 @@ class Home extends React.Component {
               this.state.products.length,
               5,
               10,
+              15,
               20,
+              30,
               40,
               50,
               75,
@@ -178,7 +200,9 @@ class Home extends React.Component {
               200,
               500,
             ],
-            pageSize: numberOfRows,
+            //See DEPRECATED_AUTOROWS
+            //pageSize: numberOfRows,
+            pageSize: 15,
           }}
           actions={[
             {
@@ -189,6 +213,16 @@ class Home extends React.Component {
                 this.setState({
                   currentEditedProduct: { url: "", name: "" },
                   isDialogOpened: true,
+                });
+              },
+            },
+            {
+              tooltip: "Zobacz historię cen tych produktów",
+              icon: "history",
+              onClick: (e, data) => {
+                this.setState({
+                  isViewingHistoryPrices: true,
+                  historyPricesChartProducts: data,
                 });
               },
             },
