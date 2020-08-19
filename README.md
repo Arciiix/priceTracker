@@ -43,6 +43,7 @@ For now, the app supports only Polish electronic shops:
 1.  MediaExpert
 2.  RTV EURO AGD
 3.  Morele
+4.  Botland
 
 but it doesn't mean you can't add your own :) It's very easy, you just need to know the basics of JavaScript and HTML DOM. If you want to do that:
 
@@ -56,7 +57,7 @@ but it doesn't mean you can't add your own :) It's very easy, you just need to k
     shop = SHOPS.YOURSHOP;
     }
     ```
-    before the final else statement.
+    before the end of the if statement.
 
 4.  Then edit the fetchTheDataFromShop function - edit the switch-case statement by adding some code to get the price and title.
 5.  If you want to, you can write some tests in the productInfo.test.js file

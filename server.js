@@ -11,6 +11,7 @@ const SHOPS = {
   MEDIAEXPERT: "MediaExpert",
   RTVEUROAGD: "RTV EURO AGD",
   MORELE: "Morele.net",
+  BOTLAND: "Botland",
 };
 
 const express = require("express");
@@ -165,6 +166,8 @@ function getTheProductInfo(url) {
       shop = SHOPS.RTVEUROAGD;
     } else if (url.includes("https://www.morele.net/")) {
       shop = SHOPS.MORELE;
+    } else if (url.includes("https://botland.com.pl/")) {
+      shop = SHOPS.BOTLAND;
     }
 
     if (shop === SHOPS.EMPTY) {
@@ -237,6 +240,14 @@ function fetchTheDataFromShop(url, shop) {
         price = parseFloat(price);
 
         name = parsedDocument.querySelector(".prod-name").textContent.trim();
+        break;
+      case SHOPS.BOTLAND:
+        price = parsedDocument
+          .querySelector("#our_price_display")
+          .textContent.replace("zł", "")
+          .replace(",", ".");
+        price = parseFloat(price);
+        name = parsedDocument.querySelector("[itemprop=name]").textContent;
         break;
       default:
         return resolve(false);
@@ -440,7 +451,7 @@ function handleNewPrice(row, newPrice) {
       row.price
     } zł`;
 
-    let message = await transporter.sendMail({
+    await transporter.sendMail({
       from: EMAILACCOUNT.email,
       to: EMAILACCOUNT.recipients,
       subject: isDiscount
