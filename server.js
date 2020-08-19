@@ -4,6 +4,8 @@ const OPTIONS = {
   cronExpressionToCheckPrices: "0 10-20 * * *", //10 times a day (every hour from 10 to 20)
 };
 
+const EMAILACCOUNT = require("./emailAccount");
+
 const SHOPS = {
   EMPTY: null,
   MEDIAEXPERT: "MediaExpert",
@@ -19,6 +21,9 @@ const fetch = require("node-fetch");
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const schedule = require("node-schedule");
+const nodemailer = require("nodemailer");
+const fs = require("fs");
+const htmlMessage = fs.readFileSync("./email.min.html");
 
 const app = express();
 app.use(bodyParser.json());
@@ -35,6 +40,22 @@ const db = new sqlite3.Database("./db.db", (err) => {
   } else {
     console.log(
       `[${formatDate(new Date())}] Connected to the database successfully`
+    );
+  }
+});
+
+const transporter = nodemailer.createTransport(EMAILACCOUNT.auth);
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.log(
+      `[${formatDate(
+        new Date()
+      )}] Error while connecting to the e-mail smtp: ${error}`
+    );
+  } else {
+    console.log(
+      `[${formatDate(new Date())}] Connected to the e-mail smtp successfully`
     );
   }
 });
@@ -324,23 +345,26 @@ function checkProductsPrices() {
   return new Promise(async (resolve, reject) => {
     let rows = await getDataFromDB();
     if (!rows) {
-      //DEV
-      //Send error e-mail
       return resolve(false);
     }
     rows.forEach(async (e) => {
       let data = await fetchTheDataFromShop(e.url, e.shop);
       if (!data) {
-        //DEV
-        //Send error e-mail
+        console.log(
+          `[${formatDate(
+            new Date()
+          )}] Error while trying to fetch product data in shop ${e.shop}`
+        );
         return resolve(false);
       }
       if (data.price !== e.price) {
         let handler = await handleNewPrice(e, data.price);
-        console.log("NEW PRICE");
         if (!handler) {
-          //DEV
-          //Send error e-mail
+          console.log(
+            `[${formatDate(
+              new Date()
+            )}] Error while trying to handle the price change (send an e-mail)`
+          );
           return resolve(false);
         }
       }
@@ -350,7 +374,6 @@ function checkProductsPrices() {
 
 function handleNewPrice(row, newPrice) {
   return new Promise(async (resolve, reject) => {
-    console.log(row, newPrice);
     let newObj = {
       ...row,
       ...{ price: newPrice },
@@ -367,9 +390,61 @@ function handleNewPrice(row, newPrice) {
       return resolve(false);
     }
 
-    //Send an e-mail DEV
+    let isDiscount = row.price > newPrice;
+
+    //Calculate the discount in percents
+    let percent = isDiscount
+      ? (row.price - newPrice) / row.price
+      : (newPrice - row.price) / row.price;
+    percent *= 100;
+    percent = Math.round(percent);
+
+    let messageBodyHTML = htmlMessage.toString(); //Copy the html message
+
+    //If percent is more than 30, set the color to red when the price is higher, or to green, when it's lower, otherwise, set the color to black
+    let percentTextColor =
+      percent > 30 ? (isDiscount ? "#71EB7D" : "#D83D3D") : "#000000";
+
+    //Set the correct content on the site
+    messageBodyHTML = messageBodyHTML
+      .replace("{title}", isDiscount ? "Obniżka" : "Zmiana ceny")
+      .replace("{name}", row.name)
+      .replace("{price}", newPrice + " zł")
+      .replace("{shop}", row.shop)
+      .replace("{percent}", percent)
+      .replace("{previousPrice}", row.price + " zł")
+      .replace("{percentTextColor}", percentTextColor);
+
+    let messageBodyPlain = `Cena ${row.name} w sklepie ${row.shop} ${
+      isDiscount ? "zmniejszyła się" : "zwiększyła się"
+    } o ${percent}%, wynosząc ${newPrice} zł. Poprzednia wynosiła ${
+      row.price
+    } zł`;
+
+    let message = await transporter.sendMail({
+      from: EMAILACCOUNT.email,
+      to: EMAILACCOUNT.recipients,
+      subject: isDiscount
+        ? `Obniżka ceny ${row.name} w sklepie ${row.shop}`
+        : `Zwiększenie ceny ${row.name} w sklepie ${row.shop}`,
+      text: messageBodyPlain,
+      html: messageBodyHTML,
+      priority: "high",
+    });
+
+    console.log(
+      `[${formatDate(new Date())}] The price of ${
+        row.name
+      } has changed to ${newPrice} from ${row.price} in shop ${
+        row.shop
+      }! E-mail has been sent.`
+    );
+
+    resolve(true);
   });
 }
+
+checkProductsPrices();
 
 function formatDate(date) {
   return (
