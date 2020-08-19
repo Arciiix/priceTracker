@@ -24,11 +24,13 @@ const schedule = require("node-schedule");
 const nodemailer = require("nodemailer");
 const fs = require("fs");
 const htmlMessage = fs.readFileSync("./email.min.html");
+const path = require("path");
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+app.use(express.static(path.join(__dirname, "build")));
 
 const db = new sqlite3.Database("./db.db", (err) => {
   if (err) {
@@ -92,6 +94,7 @@ app.post("/newProduct", async (req, res) => {
   let addToDB = await addToDatabase(newObj);
   if (!addToDB) return res.sendStatus(500);
   res.sendStatus(200);
+  console.log(`[${formatDate(new Date())}] Added a new product`);
 });
 
 app.post("/updateProduct", async (req, res) => {
@@ -114,6 +117,7 @@ app.post("/updateProduct", async (req, res) => {
   let updateProductBool = await updateProduct(newObj, req.body.previous.id);
   if (!updateProductBool) return res.sendStatus(500);
   res.sendStatus(200);
+  console.log(`[${formatDate(new Date())}] Updated a product successfully`);
 });
 
 app.post("/getTheProductInfo", async (req, res) => {
@@ -135,7 +139,18 @@ app.post("/delete", async (req, res) => {
     await deleteProduct(productId);
   }
 
+  console.log(
+    `[${formatDate(new Date())}] Deleted ${req.body.ids.length} product${
+      req.body.ids.length > 1 ? "s" : ""
+    }`
+  );
+
   res.sendStatus(200);
+});
+
+app.get("*", (req, res) => {
+  //If the server gets different request url than the previous endpoints, send the site
+  res.sendFile("index.html");
 });
 
 function getTheProductInfo(url) {
@@ -369,6 +384,7 @@ function checkProductsPrices() {
         }
       }
     });
+    console.log(`[${formatDate(new Date())}] Checked the products' prices`);
   });
 }
 

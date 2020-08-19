@@ -6,8 +6,7 @@ import ProductDialog from "./ProductDialog";
 import DeleteDialog from "./DeleteDialog";
 import HistoryChart from "./HistoryChart";
 
-//DEV
-const serverIp = "http://192.168.0.107:9182";
+const serverIp = "";
 
 const translation = {
   body: {
