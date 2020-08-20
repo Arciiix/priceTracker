@@ -44,6 +44,7 @@ For now, the app supports only Polish electronic shops:
 2.  RTV EURO AGD
 3.  Morele
 4.  Botland
+5.  PlayStation Store
 
 but it doesn't mean you can't add your own :) It's very easy, you just need to know the basics of JavaScript and HTML DOM. If you want to do that:
 

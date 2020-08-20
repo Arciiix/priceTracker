@@ -49,6 +49,17 @@ test("Gets the Botland product correctly", async () => {
   expect(parseFloat(info.price)).toEqual(info.price);
 });
 
+test("Gets the PlayStation Store product correctly", async () => {
+  let info = await productInfo(
+    "https://store.playstation.com/pl-pl/product/EP0006-CUSA15090_00-NEEDFORSPEED2020"
+  );
+
+  expect(info.shop).toBe("PlayStation Store");
+  expect(info.originalName).toBe("Need for Speed™ Heat");
+  expect(info.price).not.toBeNaN();
+  expect(parseFloat(info.price)).toEqual(info.price);
+});
+
 test("Handles missing url", async () => {
   let info = await productInfo();
   expect(info.error).toBe(true);

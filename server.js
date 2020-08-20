@@ -12,6 +12,7 @@ const SHOPS = {
   RTVEUROAGD: "RTV EURO AGD",
   MORELE: "Morele.net",
   BOTLAND: "Botland",
+  PSSTORE: "PlayStation Store",
 };
 
 const express = require("express");
@@ -168,6 +169,8 @@ function getTheProductInfo(url) {
       shop = SHOPS.MORELE;
     } else if (url.includes("https://botland.com.pl/")) {
       shop = SHOPS.BOTLAND;
+    } else if (url.includes("https://store.playstation.com/")) {
+      shop = SHOPS.PSSTORE;
     }
 
     if (shop === SHOPS.EMPTY) {
@@ -248,6 +251,16 @@ function fetchTheDataFromShop(url, shop) {
           .replace(",", ".");
         price = parseFloat(price);
         name = parsedDocument.querySelector("[itemprop=name]").textContent;
+        break;
+      case SHOPS.PSSTORE:
+        price = parsedDocument
+          .querySelector(".price-display__price")
+          .textContent.replace("&nbps;", "")
+          .replace("zł", "")
+          .replace("zl", "")
+          .replace(",", ".");
+        price = parseFloat(price);
+        name = parsedDocument.querySelector(".pdp__title").textContent;
         break;
       default:
         return resolve(false);
