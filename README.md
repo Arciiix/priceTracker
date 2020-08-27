@@ -2,7 +2,7 @@
 
 Have you ever wanted a app which tracks a price of the items, and when it gets lower, sends an e-mail notification? I hope this is what you're looking for :)
 
-# Purpose
+# How does it work?
 
 The app collects data about your products in the selected shops, and when a price of them changes, sends an e-mail.
 
@@ -52,12 +52,12 @@ but it doesn't mean you can't add your own :) It's very easy, you just need to k
 2.  Edit the SHOPS enum and add your shop
 3.  Edit the getTheProductInfo' if statement by adding:
 
-
     ```js
     else if (url.includes("yourShopBaseURLAdress")) {
     shop = SHOPS.YOURSHOP;
     }
     ```
+
     before the end of the if statement.
 
 4.  Then edit the fetchTheDataFromShop function - edit the switch-case statement by adding some code to get the price and title.
